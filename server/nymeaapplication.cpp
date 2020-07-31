@@ -74,10 +74,9 @@ static void printBacktrace()
     size_t funktionNameSize = 256;
     char* functionName = (char*)malloc(funktionNameSize);
     for (int i = 1; i < traceLength; i++) {
-        QString address = QString().sprintf("%p", trace[i]);
         QString fileName = QString(symbolList[i]);
         int fileIndex = fileName.indexOf("(");
-        QString lineCommand = QString("addr2line %1 -e %2").arg(address).arg(fileName.left(fileIndex));
+        QString lineCommand = QString("addr2line 0x%1 -e %2").arg(reinterpret_cast<quintptr>(trace[i])).arg(fileName.left(fileIndex));
 
         // Read stdout from addr2line
         char buffer[1024];
@@ -108,9 +107,9 @@ static void printBacktrace()
             char* ret = abi::__cxa_demangle(begin_name, functionName, &funktionNameSize, &status);
             if (status == 0) {
                 functionName = ret;
-                functionString = QString("    %1").arg(QString().sprintf("%s+%s", functionName, begin_offset));
+                functionString = QString("    %1+%2").arg(functionName).arg(begin_offset);
             } else {
-                functionString = QString("    %1").arg(QString().sprintf("%s()+%s", begin_name, begin_offset));
+                functionString = QString("    %1()+%2").arg(begin_name).arg(begin_offset);
             }
         }
 
